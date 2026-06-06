@@ -1,8 +1,10 @@
 import express, { type Express } from "express";
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { attachUser } from "./middlewares/auth";
 
 const app: Express = express();
 
@@ -25,9 +27,13 @@ app.use(
     },
   }),
 );
-app.use(cors());
+// `origin: true` reflects the request origin and, together with
+// `credentials: true`, allows browsers to send the session cookie.
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(attachUser);
 
 app.use("/api", router);
 
