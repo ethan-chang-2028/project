@@ -10,6 +10,7 @@ A homework platform where teachers assign step-based problems and students submi
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string; `PORT` — port the API server listens on (e.g. `5000`). Optional: `NODE_ENV` (`production` enables the `Secure` flag on session cookies), `LOG_LEVEL`.
+- Google sign-in (optional): set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (from the Google Cloud console). Register the callback as an Authorized redirect URI; either set `OAUTH_REDIRECT_URI` to that exact URL or let the server derive it from the request. Optional: `APP_POST_LOGIN_REDIRECT` (default `/dashboard`), `APP_LOGIN_REDIRECT` (default `/login`). The web app shows the Google button by default; build with `VITE_GOOGLE_ENABLED=false` to hide it. When the vars are unset, the button degrades to `/login?error=google_not_configured`.
 
 ## Stack
 
@@ -32,10 +33,11 @@ A homework platform where teachers assign step-based problems and students submi
 - **Sessions** are opaque server-side rows, not JWTs. The cookie carries a random token; the DB stores only its SHA-256 hash, so a leaked row can't be replayed as a live cookie. Cookie is `HttpOnly`, `SameSite=Lax`, and `Secure` in production.
 - **Auth is cookie-based** (browser sends it automatically). CORS uses `origin: true` + `credentials: true` so a separate frontend origin can authenticate. Do not use the bearer-token getter in `custom-fetch.ts` for the web app.
 - Request bodies are validated with the generated Zod schemas (`SignupBody`, `LoginBody`) — the OpenAPI spec is the single source of validation truth shared by server and client.
+- **Google sign-in** is a server-side OAuth 2.0 code flow (`GET /api/auth/google` → Google → `GET /api/auth/google/callback`) implemented with Node's global `fetch` (no SDK). It's intentionally *not* in the OpenAPI spec because it's browser navigation, not a typed client call. CSRF is covered by a short-lived `oauth_state` cookie; on success the same opaque session cookie is issued. `users.password_hash` is nullable so Google-only accounts have no password; a Google login is linked to an existing email-based account when the emails match.
 
 ## Product
 
-- Users can sign up (as a `student` or `teacher`), log in, log out, and fetch the current user. Endpoints: `POST /api/auth/signup`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`.
+- Users can sign up (as a `student` or `teacher`), log in (password or **Google**), log out, and fetch the current user. Endpoints: `POST /api/auth/signup`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`, `GET /api/auth/google`, `GET /api/auth/google/callback`.
 
 ## User preferences
 

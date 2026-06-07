@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { GoogleButton, OrDivider } from "@/components/google-button";
 import { getErrorMessage } from "@/lib/errors";
 
 export default function Signup() {
@@ -49,7 +50,10 @@ export default function Signup() {
           <CardTitle className="text-xl">Create your account</CardTitle>
           <CardDescription>Join StepCheck as a student or teacher.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <GoogleButton label="Sign up with Google" />
+          <OrDivider />
+
           <form onSubmit={onSubmit} className="space-y-4" data-testid="form-signup">
             {signup.isError && (
               <p className="text-sm text-destructive" data-testid="text-signup-error">

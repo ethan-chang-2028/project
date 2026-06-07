@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   getGetCurrentUserQueryKey,
@@ -16,12 +16,17 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { GoogleButton, OrDivider } from "@/components/google-button";
 import { getErrorMessage } from "@/lib/errors";
+import { oauthErrorMessage } from "@/lib/oauth-error";
 
 export default function Login() {
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
   const login = useLogin();
+
+  const search = useSearch();
+  const oauthError = oauthErrorMessage(new URLSearchParams(search).get("error"));
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,7 +50,16 @@ export default function Login() {
           <CardTitle className="text-xl">Welcome back</CardTitle>
           <CardDescription>Log in to your StepCheck account.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          {oauthError && (
+            <p className="text-sm text-destructive" data-testid="text-oauth-error">
+              {oauthError}
+            </p>
+          )}
+
+          <GoogleButton label="Continue with Google" />
+          <OrDivider />
+
           <form onSubmit={onSubmit} className="space-y-4" data-testid="form-login">
             {login.isError && (
               <p className="text-sm text-destructive" data-testid="text-login-error">
