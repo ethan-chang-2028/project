@@ -12,9 +12,13 @@ export const usersTable = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: text("email").notNull().unique(),
   // scrypt-derived hash (`salt:hash` hex). Never returned to clients.
-  passwordHash: text("password_hash").notNull(),
+  // Nullable: accounts created via an OAuth provider have no password.
+  passwordHash: text("password_hash"),
   name: text("name").notNull(),
   role: userRoleEnum("role").notNull().default("student"),
+  // Google OpenID `sub` for accounts linked to Google sign-in.
+  googleId: text("google_id").unique(),
+  avatarUrl: text("avatar_url"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
