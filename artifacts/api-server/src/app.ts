@@ -5,6 +5,7 @@ import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { attachUser } from "./middlewares/auth";
+import { errorHandler, notFound } from "./middlewares/errorHandler";
 
 const app: Express = express();
 
@@ -36,5 +37,11 @@ app.use(cookieParser());
 app.use(attachUser);
 
 app.use("/api", router);
+
+// Unmatched API routes -> JSON 404; any thrown/rejected error -> JSON 500.
+// Both must come after the routes. The error handler also prevents internal
+// errors (stack traces, SQL) from leaking to clients.
+app.use("/api", notFound);
+app.use(errorHandler);
 
 export default app;
