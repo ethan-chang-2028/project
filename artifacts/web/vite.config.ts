@@ -26,6 +26,17 @@ if (!basePath) {
   );
 }
 
+// Proxy `/api/*` to the API server so auth requests stay first-party and the
+// session cookie is sent automatically. In production the platform router
+// handles this routing, so the proxy only matters for dev/preview.
+const apiTarget = process.env.API_PROXY_TARGET ?? "http://localhost:8080";
+const apiProxy = {
+  "/api": {
+    target: apiTarget,
+    changeOrigin: true,
+  },
+};
+
 export default defineConfig({
   base: basePath,
   plugins: [
@@ -63,6 +74,7 @@ export default defineConfig({
     strictPort: true,
     host: "0.0.0.0",
     allowedHosts: true,
+    proxy: apiProxy,
     fs: {
       strict: true,
     },
@@ -71,5 +83,6 @@ export default defineConfig({
     port,
     host: "0.0.0.0",
     allowedHosts: true,
+    proxy: apiProxy,
   },
 });
