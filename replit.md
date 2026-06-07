@@ -9,6 +9,7 @@ A homework platform where teachers assign step-based problems and students submi
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
+- `pnpm --filter @workspace/db run seed` — create/refresh demo accounts (idempotent). Teacher `teacher@stepcheck.test` / `Teacher123!`, student `student@stepcheck.test` / `Student123!` (demo credentials only). Requires `DATABASE_URL` and that the schema has been pushed.
 - Required env: `DATABASE_URL` — Postgres connection string; `PORT` — port the API server listens on (e.g. `5000`). Optional: `NODE_ENV` (`production` enables the `Secure` flag on session cookies), `LOG_LEVEL`.
 - Google sign-in (optional): set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` (from the Google Cloud console). Register the callback as an Authorized redirect URI; either set `OAUTH_REDIRECT_URI` to that exact URL or let the server derive it from the request. Optional: `APP_POST_LOGIN_REDIRECT` (default `/dashboard`), `APP_LOGIN_REDIRECT` (default `/login`). The web app shows the Google button by default; build with `VITE_GOOGLE_ENABLED=false` to hide it. When the vars are unset, the button degrades to `/login?error=google_not_configured`.
 
