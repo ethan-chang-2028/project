@@ -1,5 +1,5 @@
 import type { NextFunction, Request, RequestHandler, Response } from "express";
-import type { PublicUser } from "@workspace/db";
+import type { PublicUser, UserRole } from "@workspace/db";
 
 import { SESSION_COOKIE, validateSession } from "../lib/auth";
 
@@ -45,4 +45,19 @@ export function requireAuth(
     return;
   }
   next();
+}
+
+/** Guard that returns 401 if unauthenticated, or 403 if the role doesn't match. */
+export function requireRole(role: UserRole): RequestHandler {
+  return (req, res, next) => {
+    if (!req.user) {
+      res.status(401).json({ error: "Authentication required" });
+      return;
+    }
+    if (req.user.role !== role) {
+      res.status(403).json({ error: "Forbidden" });
+      return;
+    }
+    next();
+  };
 }

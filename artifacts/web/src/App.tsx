@@ -6,6 +6,10 @@ import NotFound from "@/pages/not-found";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import Dashboard from "@/pages/Dashboard";
+import TeacherClasses from "@/pages/teacher/Classes";
+import ClassDetail from "@/pages/teacher/ClassDetail";
+import AssignmentDetail from "@/pages/teacher/AssignmentDetail";
+import { RequireTeacher } from "@/components/teacher/RequireTeacher";
 
 const queryClient = new QueryClient();
 
@@ -104,6 +108,25 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/teacher/classes">
+        <RequireTeacher>
+          <TeacherClasses />
+        </RequireTeacher>
+      </Route>
+      <Route path="/teacher/classes/:classId">
+        {(params) => (
+          <RequireTeacher>
+            <ClassDetail classId={params.classId} />
+          </RequireTeacher>
+        )}
+      </Route>
+      <Route path="/teacher/assignments/:assignmentId">
+        {(params) => (
+          <RequireTeacher>
+            <AssignmentDetail assignmentId={params.assignmentId} />
+          </RequireTeacher>
+        )}
+      </Route>
       <Route component={NotFound} />
     </Switch>
   );

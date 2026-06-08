@@ -24,9 +24,11 @@ A homework platform where teachers assign step-based problems and students submi
 
 ## Where things live
 
-- DB schema (source of truth): `lib/db/src/schema/` — `users.ts`, `sessions.ts`. Run `pnpm --filter @workspace/db run push` to apply.
+- DB schema (source of truth): `lib/db/src/schema/` — `users.ts`, `sessions.ts`, `classes.ts`, `assignments.ts`, `problems.ts`. Run `pnpm --filter @workspace/db run push` to apply.
 - API contract (source of truth): `lib/api-spec/openapi.yaml`. After editing it, run `pnpm --filter @workspace/api-spec run codegen` to regenerate the Zod schemas (`lib/api-zod`) and React Query client (`lib/api-client-react`). Never hand-edit the `generated/` folders.
-- Auth backend: `artifacts/api-server/src/lib/auth.ts` (hashing + sessions), `src/middlewares/auth.ts` (`attachUser`, `requireAuth`), `src/routes/auth.ts` (endpoints).
+- Auth backend: `artifacts/api-server/src/lib/auth.ts` (hashing + sessions), `src/middlewares/auth.ts` (`attachUser`, `requireAuth`, `requireRole`), `src/routes/auth.ts`.
+- Teacher backend: `artifacts/api-server/src/routes/classes.ts` (classes, assignments, problems — teacher-gated with per-row ownership checks).
+- Teacher UI: `artifacts/web/src/pages/teacher/` (`Classes`, `ClassDetail`, `AssignmentDetail`), gated by `components/teacher/RequireTeacher.tsx`.
 
 ## Architecture decisions
 
@@ -39,6 +41,7 @@ A homework platform where teachers assign step-based problems and students submi
 ## Product
 
 - Users can sign up (as a `student` or `teacher`), log in (password or **Google**), log out, and fetch the current user. Endpoints: `POST /api/auth/signup`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`, `GET /api/auth/google`, `GET /api/auth/google/callback`.
+- **Teachers** can create classes (each gets a student join code), add assignments to a class, and author step-based problems (a stem plus an ordered answer key of `{prompt, answer}` steps). Endpoints (all teacher-only): `GET/POST /api/classes`, `GET /api/classes/{id}`, `GET/POST /api/classes/{id}/assignments`, `GET /api/assignments/{id}`, `POST /api/assignments/{id}/problems`. Problem steps are stored as JSONB on `problems`. The student-facing join/submit flow is not built yet.
 
 ## User preferences
 

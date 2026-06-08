@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: auth
     description: Authentication operations
+  - name: classes
+    description: Teacher class and assignment management
 paths:
   /healthz:
     get:
@@ -96,7 +98,180 @@ paths:
                 $ref: "#/components/schemas/AuthUser"
         "401":
           $ref: "#/components/responses/Error"
+  /classes:
+    get:
+      operationId: listClasses
+      tags: [classes]
+      summary: List the teacher's classes
+      responses:
+        "200":
+          description: The teacher's classes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Class"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createClass
+      tags: [classes]
+      summary: Create a class
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClassRequest"
+      responses:
+        "201":
+          description: Class created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Class"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+  /classes/{classId}:
+    get:
+      operationId: getClass
+      tags: [classes]
+      summary: Get a class
+      parameters:
+        - $ref: "#/components/parameters/ClassId"
+      responses:
+        "200":
+          description: The class
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Class"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+  /classes/{classId}/assignments:
+    get:
+      operationId: listAssignments
+      tags: [classes]
+      summary: List a class's assignments
+      parameters:
+        - $ref: "#/components/parameters/ClassId"
+      responses:
+        "200":
+          description: The class's assignments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Assignment"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+    post:
+      operationId: createAssignment
+      tags: [classes]
+      summary: Create an assignment in a class
+      parameters:
+        - $ref: "#/components/parameters/ClassId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAssignmentRequest"
+      responses:
+        "201":
+          description: Assignment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Assignment"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+  /assignments/{assignmentId}:
+    get:
+      operationId: getAssignment
+      tags: [classes]
+      summary: Get an assignment with its problems
+      parameters:
+        - $ref: "#/components/parameters/AssignmentId"
+      responses:
+        "200":
+          description: The assignment and its problems
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssignmentWithProblems"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+  /assignments/{assignmentId}/problems:
+    post:
+      operationId: createProblem
+      tags: [classes]
+      summary: Add a step-based problem to an assignment
+      parameters:
+        - $ref: "#/components/parameters/AssignmentId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProblemRequest"
+      responses:
+        "201":
+          description: Problem created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "400":
+          $ref: "#/components/responses/Error"
+        "401":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
 components:
+  parameters:
+    ClassId:
+      name: classId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    AssignmentId:
+      name: assignmentId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
   responses:
     Error:
       description: Error response
@@ -177,3 +352,141 @@ components:
       required:
         - email
         - password
+    Class:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        teacherId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        joinCode:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - teacherId
+        - name
+        - joinCode
+        - createdAt
+    CreateClassRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 120
+      required:
+        - name
+    Assignment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        classId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        instructions:
+          type: string
+        dueAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - classId
+        - title
+        - instructions
+        - createdAt
+    CreateAssignmentRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        instructions:
+          type: string
+          maxLength: 5000
+        dueAt:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - title
+    ProblemStep:
+      type: object
+      properties:
+        prompt:
+          type: string
+          minLength: 1
+        answer:
+          type: string
+          minLength: 1
+      required:
+        - prompt
+        - answer
+    Problem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        assignmentId:
+          type: string
+          format: uuid
+        position:
+          type: integer
+        prompt:
+          type: string
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProblemStep"
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - assignmentId
+        - position
+        - prompt
+        - steps
+        - createdAt
+    CreateProblemRequest:
+      type: object
+      properties:
+        prompt:
+          type: string
+          minLength: 1
+          maxLength: 5000
+        steps:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/ProblemStep"
+      required:
+        - prompt
+        - steps
+    AssignmentWithProblems:
+      allOf:
+        - $ref: "#/components/schemas/Assignment"
+        - type: object
+          properties:
+            problems:
+              type: array
+              items:
+                $ref: "#/components/schemas/Problem"
+          required:
+            - problems

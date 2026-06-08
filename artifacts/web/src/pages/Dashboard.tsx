@@ -1,4 +1,4 @@
-import { Redirect, useLocation } from "wouter";
+import { Link, Redirect, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   getGetCurrentUserQueryKey,
@@ -81,7 +81,15 @@ export default function Dashboard() {
             </div>
           </dl>
 
-          <div className="mt-8">
+          {user.role === "teacher" && (
+            <div className="mt-8">
+              <Button asChild className="w-full" data-testid="link-my-classes">
+                <Link href="/teacher/classes">Go to my classes</Link>
+              </Button>
+            </div>
+          )}
+
+          <div className="mt-4">
             <Button
               variant="outline"
               className="w-full"

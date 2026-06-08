@@ -69,3 +69,138 @@ export const GetCurrentUserResponse = zod.object({
 })
 
 
+/**
+ * @summary List the teacher's classes
+ */
+export const ListClassesResponseItem = zod.object({
+  "id": zod.string().uuid(),
+  "teacherId": zod.string().uuid(),
+  "name": zod.string(),
+  "joinCode": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+export const ListClassesResponse = zod.array(ListClassesResponseItem)
+
+
+/**
+ * @summary Create a class
+ */
+export const createClassBodyNameMax = 120;
+
+
+
+export const CreateClassBody = zod.object({
+  "name": zod.string().min(1).max(createClassBodyNameMax)
+})
+
+
+/**
+ * @summary Get a class
+ */
+export const GetClassParams = zod.object({
+  "classId": zod.coerce.string().uuid()
+})
+
+export const GetClassResponse = zod.object({
+  "id": zod.string().uuid(),
+  "teacherId": zod.string().uuid(),
+  "name": zod.string(),
+  "joinCode": zod.string(),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary List a class's assignments
+ */
+export const ListAssignmentsParams = zod.object({
+  "classId": zod.coerce.string().uuid()
+})
+
+export const ListAssignmentsResponseItem = zod.object({
+  "id": zod.string().uuid(),
+  "classId": zod.string().uuid(),
+  "title": zod.string(),
+  "instructions": zod.string(),
+  "dueAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date()
+})
+export const ListAssignmentsResponse = zod.array(ListAssignmentsResponseItem)
+
+
+/**
+ * @summary Create an assignment in a class
+ */
+export const CreateAssignmentParams = zod.object({
+  "classId": zod.coerce.string().uuid()
+})
+
+export const createAssignmentBodyTitleMax = 200;
+
+export const createAssignmentBodyInstructionsMax = 5000;
+
+
+
+export const CreateAssignmentBody = zod.object({
+  "title": zod.string().min(1).max(createAssignmentBodyTitleMax),
+  "instructions": zod.string().max(createAssignmentBodyInstructionsMax).optional(),
+  "dueAt": zod.coerce.date().nullish()
+})
+
+
+/**
+ * @summary Get an assignment with its problems
+ */
+export const GetAssignmentParams = zod.object({
+  "assignmentId": zod.coerce.string().uuid()
+})
+
+
+
+
+
+export const GetAssignmentResponse = zod.object({
+  "id": zod.string().uuid(),
+  "classId": zod.string().uuid(),
+  "title": zod.string(),
+  "instructions": zod.string(),
+  "dueAt": zod.coerce.date().nullish(),
+  "createdAt": zod.coerce.date()
+}).and(zod.object({
+  "problems": zod.array(zod.object({
+  "id": zod.string().uuid(),
+  "assignmentId": zod.string().uuid(),
+  "position": zod.number(),
+  "prompt": zod.string(),
+  "steps": zod.array(zod.object({
+  "prompt": zod.string().min(1),
+  "answer": zod.string().min(1)
+})),
+  "createdAt": zod.coerce.date()
+}))
+}))
+
+
+/**
+ * @summary Add a step-based problem to an assignment
+ */
+export const CreateProblemParams = zod.object({
+  "assignmentId": zod.coerce.string().uuid()
+})
+
+export const createProblemBodyPromptMax = 5000;
+
+
+
+
+
+
+export const CreateProblemBody = zod.object({
+  "prompt": zod.string().min(1).max(createProblemBodyPromptMax),
+  "steps": zod.array(zod.object({
+  "prompt": zod.string().min(1),
+  "answer": zod.string().min(1)
+})).min(1)
+})
+
+

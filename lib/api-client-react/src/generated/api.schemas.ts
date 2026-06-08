@@ -47,3 +47,69 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface Class {
+  id: string;
+  teacherId: string;
+  name: string;
+  joinCode: string;
+  createdAt: string;
+}
+
+export interface CreateClassRequest {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  name: string;
+}
+
+export interface Assignment {
+  id: string;
+  classId: string;
+  title: string;
+  instructions: string;
+  dueAt?: string | null;
+  createdAt: string;
+}
+
+export interface CreateAssignmentRequest {
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  title: string;
+  /** @maxLength 5000 */
+  instructions?: string;
+  dueAt?: string | null;
+}
+
+export interface ProblemStep {
+  /** @minLength 1 */
+  prompt: string;
+  /** @minLength 1 */
+  answer: string;
+}
+
+export interface Problem {
+  id: string;
+  assignmentId: string;
+  position: number;
+  prompt: string;
+  steps: ProblemStep[];
+  createdAt: string;
+}
+
+export interface CreateProblemRequest {
+  /**
+     * @minLength 1
+     * @maxLength 5000
+     */
+  prompt: string;
+  /** @minItems 1 */
+  steps: ProblemStep[];
+}
+
+export type AssignmentWithProblems = Assignment & {
+  problems: Problem[];
+};
+

@@ -4,3 +4,6 @@
 
 export * from "./users";
 export * from "./sessions";
+export * from "./classes";
+export * from "./assignments";
+export * from "./problems";

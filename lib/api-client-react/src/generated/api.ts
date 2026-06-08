@@ -20,10 +20,17 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  Assignment,
+  AssignmentWithProblems,
   AuthUser,
+  Class,
+  CreateAssignmentRequest,
+  CreateClassRequest,
+  CreateProblemRequest,
   ErrorResponse,
   HealthStatus,
   LoginRequest,
+  Problem,
   SignupRequest
 } from './api.schemas';
 
@@ -409,4 +416,527 @@ export function useGetCurrentUser<TData = Awaited<ReturnType<typeof getCurrentUs
 
 
 
+
+export const getListClassesUrl = () => {
+
+
+
+
+  return `/api/classes`
+}
+
+/**
+ * @summary List the teacher's classes
+ */
+export const listClasses = async ( options?: RequestInit): Promise<Class[]> => {
+
+  return customFetch<Class[]>(getListClassesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListClassesQueryKey = () => {
+    return [
+    `/api/classes`
+    ] as const;
+    }
+
+
+export const getListClassesQueryOptions = <TData = Awaited<ReturnType<typeof listClasses>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listClasses>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListClassesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listClasses>>> = ({ signal }) => listClasses({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listClasses>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListClassesQueryResult = NonNullable<Awaited<ReturnType<typeof listClasses>>>
+export type ListClassesQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List the teacher's classes
+ */
+
+export function useListClasses<TData = Awaited<ReturnType<typeof listClasses>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listClasses>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListClassesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateClassUrl = () => {
+
+
+
+
+  return `/api/classes`
+}
+
+/**
+ * @summary Create a class
+ */
+export const createClass = async (createClassRequest: CreateClassRequest, options?: RequestInit): Promise<Class> => {
+
+  return customFetch<Class>(getCreateClassUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createClassRequest,)
+  }
+);}
+
+
+
+
+export const getCreateClassMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createClass>>, TError,{data: BodyType<CreateClassRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createClass>>, TError,{data: BodyType<CreateClassRequest>}, TContext> => {
+
+const mutationKey = ['createClass'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createClass>>, {data: BodyType<CreateClassRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createClass(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateClassMutationResult = NonNullable<Awaited<ReturnType<typeof createClass>>>
+    export type CreateClassMutationBody = BodyType<CreateClassRequest>
+    export type CreateClassMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Create a class
+ */
+export const useCreateClass = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createClass>>, TError,{data: BodyType<CreateClassRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createClass>>,
+        TError,
+        {data: BodyType<CreateClassRequest>},
+        TContext
+      > => {
+      return useMutation(getCreateClassMutationOptions(options));
+    }
+
+export const getGetClassUrl = (classId: string,) => {
+
+
+
+
+  return `/api/classes/${classId}`
+}
+
+/**
+ * @summary Get a class
+ */
+export const getClass = async (classId: string, options?: RequestInit): Promise<Class> => {
+
+  return customFetch<Class>(getGetClassUrl(classId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetClassQueryKey = (classId: string,) => {
+    return [
+    `/api/classes/${classId}`
+    ] as const;
+    }
+
+
+export const getGetClassQueryOptions = <TData = Awaited<ReturnType<typeof getClass>>, TError = ErrorType<ErrorResponse>>(classId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getClass>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetClassQueryKey(classId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getClass>>> = ({ signal }) => getClass(classId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(classId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getClass>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetClassQueryResult = NonNullable<Awaited<ReturnType<typeof getClass>>>
+export type GetClassQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get a class
+ */
+
+export function useGetClass<TData = Awaited<ReturnType<typeof getClass>>, TError = ErrorType<ErrorResponse>>(
+ classId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getClass>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetClassQueryOptions(classId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getListAssignmentsUrl = (classId: string,) => {
+
+
+
+
+  return `/api/classes/${classId}/assignments`
+}
+
+/**
+ * @summary List a class's assignments
+ */
+export const listAssignments = async (classId: string, options?: RequestInit): Promise<Assignment[]> => {
+
+  return customFetch<Assignment[]>(getListAssignmentsUrl(classId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListAssignmentsQueryKey = (classId: string,) => {
+    return [
+    `/api/classes/${classId}/assignments`
+    ] as const;
+    }
+
+
+export const getListAssignmentsQueryOptions = <TData = Awaited<ReturnType<typeof listAssignments>>, TError = ErrorType<ErrorResponse>>(classId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAssignments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAssignmentsQueryKey(classId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAssignments>>> = ({ signal }) => listAssignments(classId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(classId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAssignments>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAssignmentsQueryResult = NonNullable<Awaited<ReturnType<typeof listAssignments>>>
+export type ListAssignmentsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List a class's assignments
+ */
+
+export function useListAssignments<TData = Awaited<ReturnType<typeof listAssignments>>, TError = ErrorType<ErrorResponse>>(
+ classId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAssignments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAssignmentsQueryOptions(classId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateAssignmentUrl = (classId: string,) => {
+
+
+
+
+  return `/api/classes/${classId}/assignments`
+}
+
+/**
+ * @summary Create an assignment in a class
+ */
+export const createAssignment = async (classId: string,
+    createAssignmentRequest: CreateAssignmentRequest, options?: RequestInit): Promise<Assignment> => {
+
+  return customFetch<Assignment>(getCreateAssignmentUrl(classId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createAssignmentRequest,)
+  }
+);}
+
+
+
+
+export const getCreateAssignmentMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAssignment>>, TError,{classId: string;data: BodyType<CreateAssignmentRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createAssignment>>, TError,{classId: string;data: BodyType<CreateAssignmentRequest>}, TContext> => {
+
+const mutationKey = ['createAssignment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createAssignment>>, {classId: string;data: BodyType<CreateAssignmentRequest>}> = (props) => {
+          const {classId,data} = props ?? {};
+
+          return  createAssignment(classId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateAssignmentMutationResult = NonNullable<Awaited<ReturnType<typeof createAssignment>>>
+    export type CreateAssignmentMutationBody = BodyType<CreateAssignmentRequest>
+    export type CreateAssignmentMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Create an assignment in a class
+ */
+export const useCreateAssignment = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAssignment>>, TError,{classId: string;data: BodyType<CreateAssignmentRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createAssignment>>,
+        TError,
+        {classId: string;data: BodyType<CreateAssignmentRequest>},
+        TContext
+      > => {
+      return useMutation(getCreateAssignmentMutationOptions(options));
+    }
+
+export const getGetAssignmentUrl = (assignmentId: string,) => {
+
+
+
+
+  return `/api/assignments/${assignmentId}`
+}
+
+/**
+ * @summary Get an assignment with its problems
+ */
+export const getAssignment = async (assignmentId: string, options?: RequestInit): Promise<AssignmentWithProblems> => {
+
+  return customFetch<AssignmentWithProblems>(getGetAssignmentUrl(assignmentId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAssignmentQueryKey = (assignmentId: string,) => {
+    return [
+    `/api/assignments/${assignmentId}`
+    ] as const;
+    }
+
+
+export const getGetAssignmentQueryOptions = <TData = Awaited<ReturnType<typeof getAssignment>>, TError = ErrorType<ErrorResponse>>(assignmentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAssignment>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAssignmentQueryKey(assignmentId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAssignment>>> = ({ signal }) => getAssignment(assignmentId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(assignmentId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAssignment>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAssignmentQueryResult = NonNullable<Awaited<ReturnType<typeof getAssignment>>>
+export type GetAssignmentQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get an assignment with its problems
+ */
+
+export function useGetAssignment<TData = Awaited<ReturnType<typeof getAssignment>>, TError = ErrorType<ErrorResponse>>(
+ assignmentId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAssignment>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAssignmentQueryOptions(assignmentId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateProblemUrl = (assignmentId: string,) => {
+
+
+
+
+  return `/api/assignments/${assignmentId}/problems`
+}
+
+/**
+ * @summary Add a step-based problem to an assignment
+ */
+export const createProblem = async (assignmentId: string,
+    createProblemRequest: CreateProblemRequest, options?: RequestInit): Promise<Problem> => {
+
+  return customFetch<Problem>(getCreateProblemUrl(assignmentId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createProblemRequest,)
+  }
+);}
+
+
+
+
+export const getCreateProblemMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProblem>>, TError,{assignmentId: string;data: BodyType<CreateProblemRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createProblem>>, TError,{assignmentId: string;data: BodyType<CreateProblemRequest>}, TContext> => {
+
+const mutationKey = ['createProblem'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createProblem>>, {assignmentId: string;data: BodyType<CreateProblemRequest>}> = (props) => {
+          const {assignmentId,data} = props ?? {};
+
+          return  createProblem(assignmentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateProblemMutationResult = NonNullable<Awaited<ReturnType<typeof createProblem>>>
+    export type CreateProblemMutationBody = BodyType<CreateProblemRequest>
+    export type CreateProblemMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Add a step-based problem to an assignment
+ */
+export const useCreateProblem = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProblem>>, TError,{assignmentId: string;data: BodyType<CreateProblemRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createProblem>>,
+        TError,
+        {assignmentId: string;data: BodyType<CreateProblemRequest>},
+        TContext
+      > => {
+      return useMutation(getCreateProblemMutationOptions(options));
+    }
 

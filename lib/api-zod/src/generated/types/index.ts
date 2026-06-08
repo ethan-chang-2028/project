@@ -6,9 +6,17 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './assignment';
+export * from './assignmentWithProblems';
 export * from './authUser';
+export * from './class';
+export * from './createAssignmentRequest';
+export * from './createClassRequest';
+export * from './createProblemRequest';
 export * from './errorResponse';
 export * from './healthStatus';
 export * from './loginRequest';
+export * from './problem';
+export * from './problemStep';
 export * from './signupRequest';
 export * from './userRole';
