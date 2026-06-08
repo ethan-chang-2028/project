@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   getGetAssignmentQueryKey,
@@ -15,7 +15,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { TeacherLayout } from "@/components/teacher/TeacherLayout";
 import { getErrorMessage } from "@/lib/errors";
 
-const emptyStep = (): ProblemStep => ({ prompt: "", answer: "" });
+// A step row in the editor carries a stable client-only `key` so React keeps
+// inputs/focus tied to the right row as rows are added and removed.
+interface StepRow extends ProblemStep {
+  key: number;
+}
 
 export default function AssignmentDetail({
   assignmentId,
@@ -26,14 +30,17 @@ export default function AssignmentDetail({
   const { data: assignment, isLoading } = useGetAssignment(assignmentId);
   const createProblem = useCreateProblem();
 
+  const stepKey = useRef(0);
+  const newStep = (): StepRow => ({ key: stepKey.current++, prompt: "", answer: "" });
+
   const [prompt, setPrompt] = useState("");
-  const [steps, setSteps] = useState<ProblemStep[]>([emptyStep()]);
+  const [steps, setSteps] = useState<StepRow[]>(() => [newStep()]);
 
   function updateStep(index: number, patch: Partial<ProblemStep>) {
     setSteps((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
   }
   function addStep() {
-    setSteps((prev) => [...prev, emptyStep()]);
+    setSteps((prev) => [...prev, newStep()]);
   }
   function removeStep(index: number) {
     setSteps((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== index) : prev));
@@ -58,7 +65,7 @@ export default function AssignmentDetail({
         },
       });
       setPrompt("");
-      setSteps([emptyStep()]);
+      setSteps([newStep()]);
       queryClient.invalidateQueries({
         queryKey: getGetAssignmentQueryKey(assignmentId),
       });
@@ -103,7 +110,7 @@ export default function AssignmentDetail({
               </div>
               {steps.map((step, i) => (
                 <div
-                  key={i}
+                  key={step.key}
                   className="rounded-lg border border-border p-3"
                   data-testid={`step-row-${i}`}
                 >

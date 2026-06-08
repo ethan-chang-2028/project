@@ -19,8 +19,10 @@ import { requireAuth, requireRole } from "../middlewares/auth";
 
 const router: IRouter = Router();
 
-// Everything here is teacher-only.
-router.use(requireAuth, requireRole("teacher"));
+// The teacher guard (`requireAuth, requireRole("teacher")`) is applied per
+// route below rather than via a path-less `router.use`, so that unmatched
+// `/api/*` paths fall through to the 404 handler instead of being answered
+// with 401/403 by this router.
 
 const PG_UNIQUE_VIOLATION = "23505";
 
@@ -47,11 +49,17 @@ function generateJoinCode(length = 6): string {
   return code;
 }
 
+/** Normalise an Express path param (typed `string | string[]`) to a string. */
+function paramStr(value: string | string[] | undefined): string {
+  return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
+}
+
 /** Load a class only if it belongs to the given teacher. */
 async function loadOwnedClass(
-  classId: string,
+  classIdParam: string | string[],
   teacherId: string,
 ): Promise<Class | null> {
+  const classId = paramStr(classIdParam);
   if (!UUID_RE.test(classId)) return null;
   const [cls] = await db
     .select()
@@ -63,7 +71,7 @@ async function loadOwnedClass(
 
 // --- Classes ---------------------------------------------------------------
 
-router.get("/classes", async (req, res, next) => {
+router.get("/classes", requireAuth, requireRole("teacher"), async (req, res, next) => {
   try {
     const classes = await db
       .select()
@@ -76,7 +84,7 @@ router.get("/classes", async (req, res, next) => {
   }
 });
 
-router.post("/classes", async (req, res, next) => {
+router.post("/classes", requireAuth, requireRole("teacher"), async (req, res, next) => {
   const parsed = CreateClassBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid request" });
@@ -107,7 +115,7 @@ router.post("/classes", async (req, res, next) => {
   }
 });
 
-router.get("/classes/:classId", async (req, res, next) => {
+router.get("/classes/:classId", requireAuth, requireRole("teacher"), async (req, res, next) => {
   try {
     const cls = await loadOwnedClass(req.params.classId, req.user!.id);
     if (!cls) {
@@ -122,7 +130,7 @@ router.get("/classes/:classId", async (req, res, next) => {
 
 // --- Assignments -----------------------------------------------------------
 
-router.get("/classes/:classId/assignments", async (req, res, next) => {
+router.get("/classes/:classId/assignments", requireAuth, requireRole("teacher"), async (req, res, next) => {
   try {
     const cls = await loadOwnedClass(req.params.classId, req.user!.id);
     if (!cls) {
@@ -140,7 +148,7 @@ router.get("/classes/:classId/assignments", async (req, res, next) => {
   }
 });
 
-router.post("/classes/:classId/assignments", async (req, res, next) => {
+router.post("/classes/:classId/assignments", requireAuth, requireRole("teacher"), async (req, res, next) => {
   const parsed = CreateAssignmentBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid request" });
@@ -171,7 +179,11 @@ router.post("/classes/:classId/assignments", async (req, res, next) => {
 // --- Assignment detail + problems -----------------------------------------
 
 /** Load an assignment plus its owning class, enforcing teacher ownership. */
-async function loadOwnedAssignment(assignmentId: string, teacherId: string) {
+async function loadOwnedAssignment(
+  assignmentIdParam: string | string[],
+  teacherId: string,
+) {
+  const assignmentId = paramStr(assignmentIdParam);
   if (!UUID_RE.test(assignmentId)) return null;
   const [row] = await db
     .select({ assignment: assignmentsTable, teacherId: classesTable.teacherId })
@@ -183,7 +195,7 @@ async function loadOwnedAssignment(assignmentId: string, teacherId: string) {
   return row.assignment;
 }
 
-router.get("/assignments/:assignmentId", async (req, res, next) => {
+router.get("/assignments/:assignmentId", requireAuth, requireRole("teacher"), async (req, res, next) => {
   try {
     const assignment = await loadOwnedAssignment(req.params.assignmentId, req.user!.id);
     if (!assignment) {
@@ -201,7 +213,7 @@ router.get("/assignments/:assignmentId", async (req, res, next) => {
   }
 });
 
-router.post("/assignments/:assignmentId/problems", async (req, res, next) => {
+router.post("/assignments/:assignmentId/problems", requireAuth, requireRole("teacher"), async (req, res, next) => {
   const parsed = CreateProblemBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid request" });
