@@ -360,7 +360,19 @@ export async function customFetch<T = unknown>(
 
   const requestInfo = { method, url: resolveUrl(input) };
 
-  const response = await fetch(input, { ...init, method, headers });
+  // Send cookies by default so cookie-based session auth works even when the
+  // web app and API live on different origins (the server enables credentialed
+  // CORS). `same-origin` — the fetch default — would silently drop the session
+  // cookie cross-origin, leaving every authenticated request unauthenticated.
+  // Browsers ignore `credentials` for same-origin requests, so this is safe
+  // for the dev proxy / same-origin deployments too. An explicit
+  // `options.credentials` still wins.
+  const response = await fetch(input, {
+    credentials: "include",
+    ...init,
+    method,
+    headers,
+  });
 
   if (!response.ok) {
     const errorData = await parseErrorBody(response, method);
